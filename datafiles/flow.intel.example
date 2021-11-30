@@ -1,0 +1,5 @@
+#fields	subnet_begin	subnet_end	resp_p	tag_as_orig	tags	resilient_id	alert_name	notices	notes
+206.19.69.11/32	128.18.0.0/16	443/tcp	T	tag1,tag2	1234	SSL version scanner approved	-	-
+128.18.0.0/16	206.18.69.11/32	22/tcp	T	test	1234	Approved SSH scanner	-	-
+10.0.0.0/8	206.89.69.14/32	443/tcp	T	test,notice	1234	Test Scanning with Notice	SSL::Invalid_Server_Cert	-
+

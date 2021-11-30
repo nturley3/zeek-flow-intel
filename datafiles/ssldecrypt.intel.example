@@ -1,0 +1,4 @@
+#fields	resp_h	resp_p	orig_h	profile	url_category	decrypt	
+128.11.16.240/32	443/tcp,8443/tcp	-	Server *.domain.com	*.domain.com	T
+206.9.16.12/32	443/tcp,8443/tcp	-	TEST1 SSL Decrypt Tag	-	T
+

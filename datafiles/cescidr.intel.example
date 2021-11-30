@@ -1,0 +1,5 @@
+#fields	subnet_block	labels
+134.23.0.0/16	Campus 1
+26.28.20.0/20	Campus 2
+78.24.64.0/19	Campus 3
+15.21.0.0/16	Campus 4

@@ -1,0 +1,5 @@
+[package]
+description = Flow Intelligence Zeek/Corelight Package
+tags = input, tags, cmdb, intel, ipam
+script_dir = scripts
+version = 1.0.0
