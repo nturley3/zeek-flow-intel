@@ -58,5 +58,6 @@ event zeek_init() {
         Input::add_table([$source=ipam_labels_file, $name="subnet_labels",
                         $idx=ipam_idx, $val=ipam_val, $destination=subnet_table,
                         $mode=Input::REREAD]);
+        Reporter::info(fmt("Intel Loaded: %s", ipam_labels_file));
     }
 }

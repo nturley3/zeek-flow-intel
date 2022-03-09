@@ -111,5 +111,6 @@ event zeek_init() {
         # available by the time the packets have processed. This can cause some problems with unit tests. 
         # We can trigger this a bit earlier by removing the input stream
         # Input::remove("campus_cidr_labels");
+        Reporter::info(fmt("Intel Loaded: %s", cescidr_labels_file));
     }
 }
