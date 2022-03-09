@@ -76,7 +76,9 @@ export {
 #}
 
 event Input::end_of_data(name: string, source: string) {
-    Reporter::info(fmt("Intel end-of-data triggered -> Name: %s, Source: %s", name, source));
+    if(reading_live_traffic()) {
+        Reporter::info(fmt("Intel end-of-data triggered -> Name: %s, Source: %s", name, source));
+    }
 }
 
 # Function determines whether the flow (using the 5-tuple connection ID) meets the necessary tagging conditions
