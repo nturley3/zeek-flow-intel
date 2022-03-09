@@ -55,7 +55,7 @@ export {
     const subnet_flow_tagging_file = "/workspace/datafiles/flow.intel" &redef;
 
     # Event signature for when an intel entry is modified in the file (left here for future support)
-    global intel_entry_modified: event(description: Input::TableDescription, tpe: Input::Event, left: idx, right: val);
+    # global intel_entry_modified: event(description: Input::TableDescription, tpe: Input::Event, left: idx, right: val);
 
     # This set of Analyzer::Tags (enum) is used to determine what logs we want to enhance with intel when
     # the corresponding analyzer is detected. 
@@ -70,10 +70,14 @@ export {
 # This event is raised when a data time in the source intel is added, removed or changed in the table
 # This will report to the reporter.log and should be used for monitoring Input framework status and debugging
 # This should only be enabled for debugging, otherwise it generates a lot of events
- event intel_entry_modified(description: Input::TableDescription, tpe: Input::Event, left: idx, right: val) 
- {
-     Reporter::info(fmt("Intel Modified (%s): %s = %s", tpe, left, right));
- }
+#event intel_entry_modified(description: Input::TableDescription, tpe: Input::Event, left: idx, right: val) 
+#{
+#    Reporter::info(fmt("Intel Modified (%s): %s = %s", tpe, left, right));
+#}
+
+event Input::end_of_data(name: string, source: string) {
+    Reporter::info(fmt("Intel end-of-data triggered -> Name: %s, Source: %s", name, source));
+}
 
 # Function determines whether the flow (using the 5-tuple connection ID) meets the necessary tagging conditions
 # and is found in the intel file
@@ -196,7 +200,7 @@ event zeek_init() {
         Input::add_table([$source=subnet_flow_tagging_file, $name="subnet_flowtags",
                         $idx=idx, $val=val, $destination=subnet_flowtags,
                         $mode=Input::REREAD]);
-        Reporter::info(fmt("Intel Loaded: %s", subnet_flow_tagging_file));
+        # Reporter::info(fmt("Intel Loaded: %s", subnet_flow_tagging_file));
     }
     # Input::remove("subnet_flowtags");
 }

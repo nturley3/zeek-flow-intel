@@ -75,7 +75,7 @@ event zeek_init()
         Input::add_table([$source=ssldecrypt_intel_file, $name="ssldecrypt_flowtags",
                         $idx=idx, $val=val, $destination=ssldecrypt_flowtags,
                         $mode=Input::REREAD]);
-        Reporter::info(fmt("Intel Loaded: %s", ssldecrypt_intel_file));
+        # Reporter::info(fmt("Intel Loaded: %s", ssldecrypt_intel_file));
     }
     # Input::remove("ssldecrypt_flowtags");
 }
