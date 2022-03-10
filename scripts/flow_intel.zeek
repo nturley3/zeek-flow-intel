@@ -139,8 +139,14 @@ function build_ir_record(tidx: addr): flow_intel_fields {
     local ir_tags = flow_intel_fields();
 
     ir_tags$known = T;
-    ir_tags$tags = subnet_flowtags[tidx]$tags;
-    ir_tags$alert_name = subnet_flowtags[tidx]$alert_name;
+    if(subnet_flowtags[tidx]?$tags) {
+        ir_tags$tags = subnet_flowtags[tidx]$tags;
+    }
+
+    if(subnet_flowtags[tidx]?$alert_name) {
+        ir_tags$alert_name = subnet_flowtags[tidx]$alert_name;
+    }
+
     if(subnet_flowtags[tidx]?$resilient_id) {
         ir_tags$id = subnet_flowtags[tidx]$resilient_id;
     }
