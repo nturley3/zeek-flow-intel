@@ -72,10 +72,15 @@ export {
 # This event is raised when a data time in the source intel is added, removed or changed in the table
 # This will report to the reporter.log and should be used for monitoring Input framework status and debugging
 # This should only be enabled for debugging, otherwise it generates a lot of events
-#event intel_entry_modified(description: Input::TableDescription, tpe: Input::Event, left: idx, right: val) 
-#{
-#    Reporter::info(fmt("Intel Modified (%s): %s = %s", tpe, left, right));
-#}
+# NOTE: For the events below, we leverage reading_live_traffic(). The reason is that on Corelight sensors, attempting to use
+# the Reporter framework (e.g. Reporter::info) results in a package validation error stemming from zeek_init() and the packages
+# will fail to load. This is a bit of a hack to get around the validation errors, but still allow the intel events to fire on Corelight
+# and recorded in reporter.log
+event intel_entry_modified(description: Input::TableDescription, tpe: Input::Event, left: idx, right: val) {
+    if(reading_live_traffic()) {
+        Reporter::info(fmt("Intel modified (%s): %s = %s", tpe, to_json(left), to_json(right)));
+    }
+}
 
 event Input::end_of_data(name: string, source: string) {
     if(reading_live_traffic()) {
@@ -98,28 +103,28 @@ function flow_qualifies(c: connection): addr {
     }
 
     # Check whether the originator AND responders are in the subnet table
-    # if the originator is in the table AND a subnet_end is defined AND the responder is in the subnet_end = tag
+    # If the originator is in the table AND a subnet_end is defined AND the responder is in the subnet_end = tag
     # OR if the originator is in the table AND a subnet_end is not defined AND we should tag the traffic from the originator standpoint = tag
-	if ((c$id$orig_h in subnet_flowtags && |subnet_flowtags[c$id$orig_h]$subnet_end| > 0 && 
+	if ((c$id$orig_h in subnet_flowtags && subnet_flowtags[c$id$orig_h]?$subnet_end && 
           c$id$resp_h in subnet_flowtags[c$id$orig_h]$subnet_end)
-          || c$id$orig_h in subnet_flowtags && |subnet_flowtags[c$id$orig_h]$subnet_end| == 0 && 
+          || c$id$orig_h in subnet_flowtags && !subnet_flowtags[c$id$orig_h]?$subnet_end && 
           subnet_flowtags[c$id$orig_h]$tag_as_orig) {
         # Second check whether a response port is in the table and if so, does the port match? Otherwise
         # if the response port is null, tag the flow and ignore any port matching. 
-        if(|subnet_flowtags[c$id$orig_h]$resp_p| == 0 
-          || (|subnet_flowtags[c$id$orig_h]$resp_p| > 0 && c$id$resp_p in subnet_flowtags[c$id$orig_h]$resp_p)) {
+        if(!subnet_flowtags[c$id$orig_h]?$resp_p 
+          || (subnet_flowtags[c$id$orig_h]?$resp_p && c$id$resp_p in subnet_flowtags[c$id$orig_h]$resp_p)) {
             # Condition #1, #2, #3, #6
             return c$id$orig_h;
         }
 	}
     # if the responder is in the subnet table AND a subnet_end is not defined AND we should tag the traffic from the responder standpoint = tag
     # Important to remember here that if tag_as_orig == F, then the subnet_end field must be null
-    else if(c$id$resp_h in subnet_flowtags && |subnet_flowtags[c$id$resp_h]$subnet_end| == 0 && 
+    else if(c$id$resp_h in subnet_flowtags && !subnet_flowtags[c$id$resp_h]?$subnet_end && 
              !subnet_flowtags[c$id$resp_h]$tag_as_orig) { 
         # Second check whether a response port is in the table and if so, does the port match? Otherwise
         # if the response port is null, tag the flow and ignore any port matching. 
-        if(|subnet_flowtags[c$id$resp_h]$resp_p| == 0 
-          || (|subnet_flowtags[c$id$resp_h]$resp_p| > 0 && c$id$resp_p in subnet_flowtags[c$id$resp_h]$resp_p)) {
+        if(!subnet_flowtags[c$id$resp_h]?$resp_p 
+          || (subnet_flowtags[c$id$resp_h]?$resp_p && c$id$resp_p in subnet_flowtags[c$id$resp_h]$resp_p)) {
             # Condition #4, #5
             return c$id$resp_h;
         }
@@ -201,10 +206,13 @@ event connection_state_remove(c: connection) {
 
 event zeek_init() {
     if(subnet_flow_tagging_file != "") {
-        Input::add_table([$source=subnet_flow_tagging_file, $name="subnet_flowtags",
-                        $idx=idx, $val=val, $destination=subnet_flowtags,
-                        $mode=Input::REREAD]);
-        # Reporter::info(fmt("Intel Loaded: %s", subnet_flow_tagging_file));
+        Input::add_table([$source=subnet_flow_tagging_file, 
+                            $name="subnet_flowtags",
+                            $idx=idx, 
+                            $val=val, 
+                            $destination=subnet_flowtags,
+                            $mode=Input::REREAD,
+                            $ev=intel_entry_modified]);
     }
     # Input::remove("subnet_flowtags");
 }
