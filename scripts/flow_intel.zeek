@@ -21,15 +21,17 @@ export {
 
     # Record to store all values from the intel file (remaining columns)
     type val: record {
-        tags: set[string]; # Supports CSV tokenization
-        resilient_id: set[int]; # Support multiple tickets (ints)
-        subnet_end: set[subnet];
-        resp_p: set[port];
+        tags: set[string] &optional; # Supports CSV tokenization
+        resilient_id: set[int] &optional; # Support multiple tickets (ints)
+        subnet_end: set[subnet] &optional;
+        resp_p: set[port] &optional;
         tag_as_orig: bool &default=T;
-        alert_name: set[string];
+        alert_name: set[string] &optional;
         notices: set[string] &optional;
         hostnames: set[string] &optional; # Hostnames connected to the subnet_begin address (if /32)
         notes: set[string] &optional;
+        expire_time: time &optional;
+        location: set[string] &optional;
         # resilient_open: bool; # Left for future support
     };
 
